@@ -40,37 +40,37 @@ int main(int argc, char **argv) {
         // extract just the filename
         std::string filename = filename_path.substr(found + 1);
         rapidcsv::Document df(filename_path, rapidcsv::LabelParams(0, 0));
-        const size_t rowCount = df.GetRowCount();
 
-        {
-            std::vector<Simhash::hash_t> ordered_rows(rowCount);
-            std::iota(ordered_rows.begin(), ordered_rows.end(), 0);
-            compress_decompress_from_df(ordered_rows, "arbitrary_order", filename, df, "zstd", 0);
-        }
+//        {
+//            const size_t rowCount = df.GetRowCount();
+//            std::vector<Simhash::hash_t> ordered_rows(rowCount);
+//            std::iota(ordered_rows.begin(), ordered_rows.end(), 0);
+//            compress_decompress_from_df(ordered_rows, "arbitrary_order", filename, df, "zstd", 0);
+//        }
+//        {
+//            auto start = timer::now();
+//            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_sort(df)));
+//            auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//            compress_decompress_from_df(ordered_rows, "simhash_sort", filename, df, "zstd", sorting_time);
+//        }
+//        {
+//            auto start = timer::now();
+//            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_sort_p(df)));
+//            auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//            compress_decompress_from_df(ordered_rows, "simhash_sort_parallel", filename, df, "zstd", sorting_time);
+//        }
+//        {
+//            auto start = timer::now();
+//            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_sort_graycode(df)));
+//            auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//            compress_decompress_from_df(ordered_rows, "simhash_sort_graycode", filename, df, "zstd", sorting_time);
+//        }
         {
             auto start = timer::now();
-            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_sort(df)));
+            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_cluster(df, 1 << 20)));
             auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-            compress_decompress_from_df(ordered_rows, "simhash_sort", filename, df, "zstd", sorting_time);
+            compress_decompress_from_df(ordered_rows, "simhash_cluster", filename, df, "zstd", sorting_time);
         }
-        {
-            auto start = timer::now();
-            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_sort_p(df)));
-            auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-            compress_decompress_from_df(ordered_rows, "simhash_sort_parallel", filename, df, "zstd", sorting_time);
-        }
-        {
-            auto start = timer::now();
-            std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_sort_graycode(df)));
-            auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-            compress_decompress_from_df(ordered_rows, "simhash_sort_graycode", filename, df, "zstd", sorting_time);
-        }
-        //    {
-        //        auto start = timer::now();
-        //        std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_cluster(df)));
-        //        auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-        //        compress_decompress_from_df(ordered_rows, "simhash_cluster", filename, df, "zstd", sorting_time);
-        //    }
     }
     return 0;
 }

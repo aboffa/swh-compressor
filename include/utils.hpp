@@ -181,21 +181,24 @@ std::vector<size_t> simhash_sort_graycode(rapidcsv::Document &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_cluster(rapidcsv::Document &df) {
+std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_cluster) {
     const size_t rowCount = df.GetRowCount();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(std::move(get_simhashes_parallel(df)));
     std::vector<std::array<int64_t , 4>> lsh_vec_to_cluster(rowCount);
     Simhash::hash_t ones_16 = 1 << 16;
 
+    size_t full_size = 0;
     for (auto i = 0; i < rowCount; i++) {
         lsh_vec_to_cluster[i] = {int64_t(lsh_vec[i].second and ones_16),
                                  int64_t(lsh_vec[i].second >> 16 and ones_16),
                                  int64_t(lsh_vec[i].second >> 32 and ones_16),
                                  int64_t(lsh_vec[i].second >> 48 and ones_16)};
+        std::vector<std::string> row = df.GetRow<std::string>(i);
+        full_size += std::stoll(row[1]);
     }
     // should be function of the size of the elements
-    const size_t num_cluster = 1000;
+    const size_t num_cluster = size_t(double(full_size) / double(div_for_cluster)) + 2;
     auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec_to_cluster, num_cluster);
 
     std::vector<std::vector<size_t>> clusters(num_cluster);
