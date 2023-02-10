@@ -22,7 +22,7 @@ std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv:
     const size_t rowCount = df.GetRowCount();
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
     lsh_vec.reserve(rowCount);
-#pragma omp parallel num_threads(32)
+#pragma omp parallel num_threads(32) shared(df)
     {
         std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec_private;
 #pragma omp for nowait
@@ -194,9 +194,21 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df) {
                                  int64_t(lsh_vec[i].second >> 32 and ones_16),
                                  int64_t(lsh_vec[i].second >> 48 and ones_16)};
     }
-    auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec_to_cluster, 1000);
+    // should be function of the size of the elements
+    const size_t num_cluster = 1000;
+    auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec_to_cluster, num_cluster);
 
+    std::vector<std::vector<size_t>> clusters(num_cluster);
+    size_t i = 0;
+    for (const auto& label : std::get<1>(cluster_data)) {
+        clusters[label].push_back(i++);
+    }
+    std::vector<size_t> merged_clusters;
+    merged_clusters.reserve(rowCount);
 
-    std::vector<Simhash::hash_t> to_return(rowCount);
-    return to_return;
+    for (auto& items: clusters){
+        std::move(items.begin(), items.end(), std::back_inserter(merged_clusters));
+    }
+
+    return merged_clusters;
 }
