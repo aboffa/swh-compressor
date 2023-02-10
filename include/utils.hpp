@@ -8,6 +8,7 @@
 
 #include "rapidcsv.h"
 #include "simhash.h"
+#include "dkm_parallel.hpp"
 
 using timer = std::chrono::high_resolution_clock;
 std::error_code ec;
@@ -106,10 +107,10 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
 
     // print stats
     std::cout << "compression ratio (%): "
-              << std::to_string(double(compressed_size + sorting_time) / double(uncompressed_size) * 100.)
+              << std::to_string(double(compressed_size) / double(uncompressed_size) * 100.)
               << std::endl;
     std::cout << "compression speed (MiB/s): "
-              << std::to_string(double(uncompressed_size_MiB) / double(compressed_time))
+              << std::to_string(double(uncompressed_size_MiB) / double(compressed_time + sorting_time))
               << std::endl;
     std::cout << "decompression speed (MiB/s): "
               << std::to_string(double(uncompressed_size_MiB) / double(decompressed_time)) << std::endl << std::flush;
@@ -177,5 +178,25 @@ std::vector<size_t> simhash_sort_graycode(rapidcsv::Document &df) {
     for (auto i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
+    return to_return;
+}
+
+std::vector<size_t> simhash_cluster(rapidcsv::Document &df) {
+    const size_t rowCount = df.GetRowCount();
+
+    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(std::move(get_simhashes_parallel(df)));
+    std::vector<std::array<int64_t , 4>> lsh_vec_to_cluster(rowCount);
+    Simhash::hash_t ones_16 = 1 << 16;
+
+    for (auto i = 0; i < rowCount; i++) {
+        lsh_vec_to_cluster[i] = {int64_t(lsh_vec[i].second and ones_16),
+                                 int64_t(lsh_vec[i].second >> 16 and ones_16),
+                                 int64_t(lsh_vec[i].second >> 32 and ones_16),
+                                 int64_t(lsh_vec[i].second >> 48 and ones_16)};
+    }
+    auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec_to_cluster, 1000);
+
+
+    std::vector<Simhash::hash_t> to_return(rowCount);
     return to_return;
 }

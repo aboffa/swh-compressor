@@ -24,9 +24,9 @@ void usage(char **argv) {
 }
 
 
-// "/home/boffa/simhash-cpp/C_blobs.augmented.hash_sorted.csv"
-// "/home/boffa/simhash-cpp/C_blobs.augmented.hash_sorted_small.csv"
-// "/home/boffa/simhash-cpp/Python_blobs.augmented.hash_sorted.csv"
+// "/home/boffa/swh-compressor/file_list/C_blobs.augmented.hash_sorted.csv"
+// "/home/boffa/swh-compressor/file_list/C_blobs.augmented.hash_sorted_small.csv"
+// "/home/boffa/swh-compressor/file_list/Python_blobs.augmented.hash_sorted.csv"
 
 int main(int argc, char **argv) {
     if (argc <= 1) {
@@ -60,6 +60,11 @@ int main(int argc, char **argv) {
         auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
         compress_decompress_from_df(ordered_rows, "simhash_sort_graycode", "C_blobs", df, "zstd", sorting_time);
     }
-
+//    {
+//        auto start = timer::now();
+//        std::vector<Simhash::hash_t> ordered_rows(std::move(simhash_cluster(df)));
+//        auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//        compress_decompress_from_df(ordered_rows, "simhash_cluster", "C_blobs", df, "zstd", sorting_time);
+//    }
     return 0;
 }
