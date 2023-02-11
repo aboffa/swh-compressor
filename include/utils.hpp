@@ -185,16 +185,16 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_clust
     const size_t rowCount = df.GetRowCount();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
-    std::vector<std::array<int64_t , 4>> lsh_vec_to_cluster(rowCount);
+    std::vector<std::array<int32_t , 4>> lsh_vec_to_cluster(rowCount);
     //Simhash::hash_t ones_16 = (1 << 16) - 1;
     Simhash::hash_t ones_32 = (Simhash::hash_t(1) << 32) - 1;
 
     size_t full_size = 0;
     for (auto i = 0; i < rowCount; i++) {
-        lsh_vec_to_cluster[i] = {int64_t(lsh_vec[i].second and ones_32),
-                                 int64_t(lsh_vec[i].second >> 32 and ones_32),
-                                 int64_t(lsh_vec[i].second >> 64 and ones_32),
-                                 int64_t(lsh_vec[i].second >> 96 and ones_32)};
+        lsh_vec_to_cluster[i] = {int32_t(lsh_vec[i].second and ones_32),
+                                 int32_t(lsh_vec[i].second >> 32 and ones_32),
+                                 int32_t(lsh_vec[i].second >> 64 and ones_32),
+                                 int32_t(lsh_vec[i].second >> 96 and ones_32)};
         std::vector<std::string> row = df.GetRow<std::string>(i);
         full_size += std::stoll(row[1]);
     }
