@@ -1,1 +1,45 @@
 #### 64 BITS SIMHASH
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: arbitrary_order+zstd
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: arbitrary_order+zstd
+compression ratio (%): 27.146845
+compression speed (MiB/s): 210.588007
+decompression speed (MiB/s): 359.754513
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort+zstd
+compression ratio (%): 12.179643
+compression speed (MiB/s): 110.693696
+decompression speed (MiB/s): 386.601864
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_parallel+zstd
+compression ratio (%): 12.174908
+compression speed (MiB/s): 392.459468
+decompression speed (MiB/s): 380.916543
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_graycode+zstd
+compression ratio (%): 12.115672
+compression speed (MiB/s): 392.459468
+decompression speed (MiB/s): 375.396013
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: arbitrary_order+zstd
+compression ratio (%): 38.022795
+compression speed (MiB/s): 197.938126
+decompression speed (MiB/s): 372.926904
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort+zstd
+compression ratio (%): 25.961265
+compression speed (MiB/s): 122.533126
+decompression speed (MiB/s): 402.061818
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_parallel+zstd
+compression ratio (%): 25.956218
+compression speed (MiB/s): 334.181252
+decompression speed (MiB/s): 402.061818
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_graycode+zstd
+compression ratio (%): 25.917963
+compression speed (MiB/s): 329.896877
+decompression speed (MiB/s): 221.827210
+
+#### 128 BITS SIMHASH

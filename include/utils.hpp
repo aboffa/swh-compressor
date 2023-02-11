@@ -143,7 +143,7 @@ std::vector<size_t> simhash_sort(rapidcsv::Document &df) {
         return left.second < right.second;
     });
 
-    std::vector<Simhash::hash_t> to_return(rowCount);
+    std::vector<size_t> to_return(rowCount);
     for (auto i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
@@ -158,7 +158,7 @@ std::vector<size_t> simhash_sort_p(rapidcsv::Document &df) {
     std::sort(lsh_vec.begin(), lsh_vec.end(), [](auto &left, auto &right) {
         return left.second < right.second;
     });
-    std::vector<Simhash::hash_t> to_return(rowCount);
+    std::vector<size_t> to_return(rowCount);
     for (auto i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
@@ -168,13 +168,13 @@ std::vector<size_t> simhash_sort_p(rapidcsv::Document &df) {
 std::vector<size_t> simhash_sort_graycode(rapidcsv::Document &df) {
     const size_t rowCount = df.GetRowCount();
 
-    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(std::move(get_simhashes_parallel(df)));
+    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
 
     std::sort(lsh_vec.begin(), lsh_vec.end(), [](auto &left, auto &right) {
         return gray_code(left.second) < gray_code(right.second);
     });
 
-    std::vector<Simhash::hash_t> to_return(rowCount);
+    std::vector<size_t> to_return(rowCount);
     for (auto i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
@@ -184,16 +184,17 @@ std::vector<size_t> simhash_sort_graycode(rapidcsv::Document &df) {
 std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_cluster) {
     const size_t rowCount = df.GetRowCount();
 
-    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(std::move(get_simhashes_parallel(df)));
+    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
     std::vector<std::array<int64_t , 4>> lsh_vec_to_cluster(rowCount);
-    Simhash::hash_t ones_16 = 1 << 16;
+    //Simhash::hash_t ones_16 = (1 << 16) - 1;
+    Simhash::hash_t ones_32 = (Simhash::hash_t(1) << 32) - 1;
 
     size_t full_size = 0;
     for (auto i = 0; i < rowCount; i++) {
-        lsh_vec_to_cluster[i] = {int64_t(lsh_vec[i].second and ones_16),
-                                 int64_t(lsh_vec[i].second >> 16 and ones_16),
-                                 int64_t(lsh_vec[i].second >> 32 and ones_16),
-                                 int64_t(lsh_vec[i].second >> 48 and ones_16)};
+        lsh_vec_to_cluster[i] = {int64_t(lsh_vec[i].second and ones_32),
+                                 int64_t(lsh_vec[i].second >> 32 and ones_32),
+                                 int64_t(lsh_vec[i].second >> 64 and ones_32),
+                                 int64_t(lsh_vec[i].second >> 96 and ones_32)};
         std::vector<std::string> row = df.GetRow<std::string>(i);
         full_size += std::stoll(row[1]);
     }

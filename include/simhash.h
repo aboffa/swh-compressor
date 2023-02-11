@@ -17,8 +17,8 @@ namespace Simhash {
     /**
      * The type of all hashes.
      */
-     //uint128_t
-    typedef uint64_t hash_t;
+     //uint64_t
+    typedef uint128_t hash_t;
 
     /**
      * The type of a match of two hashes.
