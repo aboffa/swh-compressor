@@ -83,3 +83,56 @@ Technique: simhash_cluster+zstd
 compression ratio (%): 38.023327
 compression speed (MiB/s): 6.594556
 decompression speed (MiB/s): 372.926904
+
+# new zstd -22
+
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: arbitrary_order+zstd3
+compression ratio (%): 11.731151
+compression speed (MiB/s): 12.489067
+decompression speed (MiB/s): 350.031418
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort+zstd3
+compression ratio (%): 7.633993
+compression speed (MiB/s): 20.063768
+decompression speed (MiB/s): 411.148014
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_parallel+zstd3
+compression ratio (%): 7.622526
+compression speed (MiB/s): 25.147888
+decompression speed (MiB/s): 446.591809
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_graycode+zstd3
+compression ratio (%): 7.563234
+compression speed (MiB/s): 24.185177
+decompression speed (MiB/s): 411.148014
+Dataset: C_blobs.augmented.hash_sorted.csv
+Technique: simhash_cluster+zstd3
+compression ratio (%): 12.034781
+compression speed (MiB/s): 4.311306
+decompression speed (MiB/s): 398.497306
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: arbitrary_order+zstd3
+compression ratio (%): 23.844114
+compression speed (MiB/s): 10.584927
+decompression speed (MiB/s): 421.835351
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort+zstd3
+compression ratio (%): 16.930705
+compression speed (MiB/s): 14.603834
+decompression speed (MiB/s): 476.517711
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_parallel+zstd3
+compression ratio (%): 16.822807
+compression speed (MiB/s): 14.645394
+decompression speed (MiB/s): 389.878127
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_sort_graycode+zstd3
+compression ratio (%): 16.919749
+compression speed (MiB/s): 15.874125
+decompression speed (MiB/s): 494.845315
+Dataset: Python_blobs.augmented.hash_sorted.csv
+Technique: simhash_cluster+zstd3
+compression ratio (%): 23.729881
+compression speed (MiB/s): 4.337821
+decompression speed (MiB/s): 428.865940

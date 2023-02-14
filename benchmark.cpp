@@ -7,9 +7,9 @@
 #include <unistd.h>
 #include <numeric>
 
+#include "utils.hpp"
 #include "rapidcsv.h"
 #include "simhash.h"
-#include "utils.hpp"
 
 void usage(char **argv) {
     std::cout << "Usage: " << argv[0] << " <filename1> <filename2> ..." << std::endl;

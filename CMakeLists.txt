@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -pedantic -fopenmp")
 
 include_directories(include)
 
-add_executable(benchmark benchmark.cpp src/SpookyV2.cpp src/permutation.cpp src/simhash.cpp)
+add_executable(benchmark benchmark.cpp src/SpookyV2.cpp src/simhash.cpp)
 
 add_executable(dmk_example dmk_example.cpp)
 

@@ -1,14 +1,13 @@
-#include "simhash.h"
-#include "permutation.h"
-#include "SpookyV2.h"
-
-#include <algorithm>
 #include <list>
 #include <string>
 #include <fstream>
 #include <iostream>
 
+#include "simhash.h"
+#include "SpookyV2.h"
+
 typedef unsigned __int128 uint128_t;
+
 const std::string WHITESPACE = " \n\r\t\f\v";
 
 std::string ltrim(const std::string &s)
@@ -25,16 +24,6 @@ std::string rtrim(const std::string &s)
 
 std::string trim(const std::string &s) {
     return rtrim(ltrim(s));
-}
-
-size_t Simhash::num_differing_bits(Simhash::hash_t a, Simhash::hash_t b) {
-    size_t count(0);
-    Simhash::hash_t n = a ^ b;
-    while (n) {
-        ++count;
-        n = n & (n - 1);
-    }
-    return count;
 }
 
 Simhash::hash_t Simhash::compute(const std::string &filename) {

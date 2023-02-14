@@ -1,8 +1,7 @@
-#ifndef SIMHASH_SIMHASH_H
-#define SIMHASH_SIMHASH_H
+#pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -60,4 +59,3 @@ namespace Simhash {
 
     hash_t compute(const std::string &filename);
 }
-#endif

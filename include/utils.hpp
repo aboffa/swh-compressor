@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <filesystem>
 #include <vector>
@@ -9,6 +11,7 @@
 #include "rapidcsv.h"
 #include "simhash.h"
 #include "dkm_parallel.hpp"
+
 
 using timer = std::chrono::high_resolution_clock;
 std::error_code ec;
@@ -25,6 +28,7 @@ std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
     o << uint64_t(to_print);
     return o;
 }
+
 
 std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv::Document &df) {
     const size_t rowCount = df.GetRowCount();
@@ -58,8 +62,8 @@ std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv:
 }
 
 void
-compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string technique_name, std::string dataset_name,
-                            rapidcsv::Document &df, std::string compressor_path, size_t sorting_time,
+compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string technique_name, std::string &dataset_name,
+                            rapidcsv::Document &df, std::string &compressor_path, size_t sorting_time,
                             std::string notes = "None") {
     std::string path_working_dir = "/ssd/tmp.Sofware_Heritage_c++_" + technique_name + "_" + std::to_string(getpid());
     // no path and no flags
@@ -68,9 +72,6 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     size_t uncompressed_size = 0;
     std::filesystem::create_directory(path_working_dir);
     std::filesystem::current_path(path_working_dir);
-
-    std::cout << "Dataset: " << dataset_name << std::endl;
-    std::cout << "Technique: " << technique_name << "+" << compressor_name << std::endl << std::flush;
 
     auto start = timer::now();
     std::string list_files_filename = path_working_dir + "/" + "list_files_compression.txt";
@@ -86,6 +87,10 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
         file << filename_path.erase(0, 1) << std::endl;
     }
     double uncompressed_size_MiB = double(uncompressed_size) / double(1 << 20);
+
+    std::cout << "File list: " << dataset_name << " of " << rowCount << " files of size (MiB) " << std::to_string(uncompressed_size_MiB) << std::endl;
+    std::cout << "Technique: " << technique_name << "+" << compressor_name << std::endl << std::flush;
+
     // TODO: I should use std::filesystem::path instead of std::strings
     std::string generated_file = path_working_dir + "/" + technique_name + ".tar." + compressor_name;
     // run tar
@@ -194,7 +199,7 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_clust
     const size_t rowCount = df.GetRowCount();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
-    std::vector<std::array<int32_t , 4>> lsh_vec_to_cluster(rowCount);
+    std::vector<std::array<int32_t, 4>> lsh_vec_to_cluster(rowCount);
     //Simhash::hash_t ones_16 = (1 << 16) - 1;
     Simhash::hash_t ones_32 = (Simhash::hash_t(1) << 32) - 1;
 
@@ -213,13 +218,13 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_clust
 
     std::vector<std::vector<size_t>> clusters(num_cluster);
     size_t i = 0;
-    for (const auto& label : std::get<1>(cluster_data)) {
+    for (const auto &label: std::get<1>(cluster_data)) {
         clusters[label].push_back(i++);
     }
     std::vector<size_t> merged_clusters;
     merged_clusters.reserve(rowCount);
 
-    for (auto& items: clusters){
+    for (auto &items: clusters) {
         std::move(items.begin(), items.end(), std::back_inserter(merged_clusters));
     }
     return merged_clusters;
