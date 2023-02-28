@@ -29,12 +29,13 @@ std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
     return o;
 }
 
+const size_t NUM_THREAD = 32;
 
 std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv::Document &df) {
     const size_t rowCount = df.GetRowCount();
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
     lsh_vec.reserve(rowCount);
-#pragma omp parallel num_threads(16) shared(df)
+#pragma omp parallel num_threads(NUM_THREAD) shared(df)
     {
         std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec_private;
 #pragma omp for nowait
@@ -228,4 +229,20 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_clust
         std::move(items.begin(), items.end(), std::back_inserter(merged_clusters));
     }
     return merged_clusters;
+}
+
+std::vector<size_t> filename_sort(rapidcsv::Document &df) {
+    const size_t rowCount = df.GetRowCount();
+
+//    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
+//
+//    std::sort(lsh_vec.begin(), lsh_vec.end(), [](auto &left, auto &right) {
+//        return gray_code(left.second) < gray_code(right.second);
+//    });
+
+    std::vector<size_t> to_return(rowCount);
+//    for (auto i = 0; i < rowCount; i++) {
+//        to_return[i] = lsh_vec[i].first;
+//    }
+    return to_return;
 }

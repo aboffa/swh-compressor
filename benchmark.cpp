@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
                 const size_t rowCount = df.GetRowCount();
                 std::vector<size_t> ordered_rows(rowCount);
                 std::iota(ordered_rows.begin(), ordered_rows.end(), 0);
-                compress_decompress_from_df(ordered_rows, "arbitrary_order", filename, df, compressor, 0);
+                compress_decompress_from_df(ordered_rows, "order_from_list", filename, df, compressor, 0);
             }
             {
                 auto start = timer::now();
