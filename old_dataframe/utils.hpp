@@ -30,7 +30,6 @@ std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
 }
 
 const size_t NUM_THREAD = 32;
-const std::string BLOBS_DIR = "/data/swh/blobs";
 
 std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv::Document &df) {
     const size_t rowCount = df.GetRowCount();
@@ -67,7 +66,7 @@ void
 compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string technique_name, std::string &dataset_name,
                             rapidcsv::Document &df, std::string &compressor_path, size_t sorting_time,
                             std::string notes = "None") {
-    std::string path_working_dir = "/data/swh/tmp._NEW_Sofware_Heritage_c++_" + technique_name + "_" + std::to_string(getpid());
+    std::string path_working_dir = "/ssd/tmp.Sofware_Heritage_c++_" + technique_name + "_" + std::to_string(getpid());
     // no path and no flags
     std::string compressor_name = std::filesystem::path(compressor_path).filename();
     const size_t rowCount = df.GetRowCount();
@@ -80,10 +79,11 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     std::ofstream file(list_files_filename);
     for (size_t i = 0; i < rowCount; ++i) {
         std::vector<std::string> row = df.GetRow<std::string>(ordered_rows[i]);
-        assert(row.size() > 0);
+        std::filesystem::path path(row[2]);
+        std::filesystem::path repo(row[6]);
         std::filesystem::path blob_hash(row[0]);
         // write filenames in file
-        std::string filename_path(BLOBS_DIR / blob_hash);
+        std::string filename_path(path / repo / blob_hash);
         uncompressed_size += std::filesystem::file_size(filename_path);
         file << filename_path.erase(0, 1) << std::endl;
     }
@@ -139,9 +139,11 @@ std::vector<size_t> simhash_sort(rapidcsv::Document &df) {
     lsh_vec.reserve(rowCount);
     for (size_t i = 0; i < rowCount; ++i) {
         std::vector<std::string> row = df.GetRow<std::string>(i);
+        std::filesystem::path path(row[2]);
+        std::filesystem::path repo(row[6]);
         std::filesystem::path blob_hash(row[0]);
 
-        std::string filename_path(BLOBS_DIR / blob_hash);
+        std::string filename_path(path / repo / blob_hash);
         if (std::filesystem::is_regular_file(filename_path, ec)) {
             Simhash::hash_t res = 0;
             res = Simhash::compute(filename_path);
