@@ -3,13 +3,12 @@
 //
 #include <iostream>
 #include <vector>
-#include <chrono>
-#include <unistd.h>
 #include <numeric>
 
 #include "utils.hpp"
-#include "rapidcsv.h"
+//#include "rapidcsv.h"
 #include "simhash.h"
+#include "my_dataframe.h"
 
 void usage(char **argv) {
     std::cout << "Usage: " << argv[0] << " <filename1> <filename2> ..." << std::endl;
@@ -36,18 +35,20 @@ int main(int argc, char **argv) {
         std::size_t found = filename_path.find_last_of('/');
         // extract just the filename
         std::string filename = filename_path.substr(found + 1);
-        rapidcsv::Document df(filename_path, rapidcsv::LabelParams(0, 0),
-                              rapidcsv::SeparatorParams(',' /* pSeparator */,
-                                                        false /* pTrim */,
-                                                        rapidcsv::sPlatformHasCR /* pHasCR */,
-                                                        false /* pQuotedLinebreaks */,
-                                                        false /* pAutoQuote */));
+        size_t num_rows = 2346930;
+//        rapidcsv::Document df(filename_path, rapidcsv::LabelParams(0, 0),
+//                              rapidcsv::SeparatorParams(',' /* pSeparator */,
+//                                                        false /* pTrim */,
+//                                                        rapidcsv::sPlatformHasCR /* pHasCR */,
+//                                                        false /* pQuotedLinebreaks */,
+//                                                        false /* pAutoQuote */));
+        my_dataframe df(filename_path, num_rows);
         for (auto &compressor: compressors) {
 
             {
-                const size_t rowCount = df.GetRowCount();
+                const size_t rowCount = df.get_num_files();
                 std::vector<size_t> ordered_rows(rowCount);
-                std::iota(ordered_rows.begin(), ordered_rows.end(), 0); // TODO here random
+                std::iota(ordered_rows.begin(), ordered_rows.end(), 0); // already random
                 compress_decompress_from_df(ordered_rows, "order_from_list", filename, df, compressor, 0);
             }
 //            {

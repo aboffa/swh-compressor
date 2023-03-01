@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "my_dataframe.h"
 #include "rapidcsv.h"
 #include "simhash.h"
 #include "dkm_parallel.hpp"
@@ -65,12 +66,12 @@ std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv:
 
 void
 compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string technique_name, std::string &dataset_name,
-                            rapidcsv::Document &df, std::string &compressor_path, size_t sorting_time,
+                            my_dataframe &df, std::string &compressor_path, size_t sorting_time,
                             std::string notes = "None") {
     std::string path_working_dir = "/data/swh/tmp._NEW_Sofware_Heritage_c++_" + technique_name + "_" + std::to_string(getpid());
     // no path and no flags
     std::string compressor_name = std::filesystem::path(compressor_path).filename();
-    const size_t rowCount = df.GetRowCount();
+    const size_t rowCount = df.get_num_files();
     size_t uncompressed_size = 0;
     std::filesystem::create_directory(path_working_dir);
     std::filesystem::current_path(path_working_dir);
@@ -79,9 +80,7 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     std::string list_files_filename = path_working_dir + "/" + "list_files_compression.txt";
     std::ofstream file(list_files_filename);
     for (size_t i = 0; i < rowCount; ++i) {
-        std::vector<std::string> row = df.GetRow<std::string>(ordered_rows[i]);
-        assert(row.size() > 0);
-        std::filesystem::path blob_hash(row[0]);
+        std::filesystem::path blob_hash(df.sha1_at_str(ordered_rows[i]));
         // write filenames in file
         std::string filename_path(BLOBS_DIR / blob_hash);
         uncompressed_size += std::filesystem::file_size(filename_path);
