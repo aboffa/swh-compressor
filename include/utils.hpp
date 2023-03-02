@@ -33,8 +33,8 @@ std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
 const size_t NUM_THREAD = 32;
 const std::string BLOBS_DIR = "/data/swh/blobs";
 
-std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv::Document &df) {
-    const size_t rowCount = df.GetRowCount();
+std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
     lsh_vec.reserve(rowCount);
 #pragma omp parallel num_threads(NUM_THREAD) shared(df)
@@ -42,12 +42,10 @@ std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(rapidcsv:
         std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec_private;
 #pragma omp for nowait
         for (size_t i = 0; i < rowCount; ++i) {
-            std::vector<std::string> row = df.GetRow<std::string>(i);
-            std::filesystem::path path(row[2]);
-            std::filesystem::path repo(row[6]);
-            std::filesystem::path blob_hash(row[0]);
+            std::string sha1 = df.sha1_at_str(i);
+            std::filesystem::path blob_hash(sha1);
 
-            std::string filename_path(path / repo / blob_hash);
+            std::string filename_path(BLOBS_DIR / blob_hash);
             if (std::filesystem::is_regular_file(filename_path, ec)) {
                 //it's a file
                 Simhash::hash_t res = 0;
@@ -80,7 +78,8 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     std::string list_files_filename = path_working_dir + "/" + "list_files_compression.txt";
     std::ofstream file(list_files_filename);
     for (size_t i = 0; i < rowCount; ++i) {
-        std::filesystem::path blob_hash(df.sha1_at_str(ordered_rows[i]));
+        std::string sha1 = df.sha1_at_str(ordered_rows[i]);
+        std::filesystem::path blob_hash(sha1);
         // write filenames in file
         std::string filename_path(BLOBS_DIR / blob_hash);
         uncompressed_size += std::filesystem::file_size(filename_path);
@@ -131,14 +130,14 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
 }
 
 
-std::vector<size_t> simhash_sort(rapidcsv::Document &df) {
-    const size_t rowCount = df.GetRowCount();
+std::vector<size_t> simhash_sort(my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
     lsh_vec.reserve(rowCount);
     for (size_t i = 0; i < rowCount; ++i) {
-        std::vector<std::string> row = df.GetRow<std::string>(i);
-        std::filesystem::path blob_hash(row[0]);
+        std::string sha1 = df.sha1_at_str(i);
+        std::filesystem::path blob_hash(sha1);
 
         std::string filename_path(BLOBS_DIR / blob_hash);
         if (std::filesystem::is_regular_file(filename_path, ec)) {
@@ -162,8 +161,8 @@ std::vector<size_t> simhash_sort(rapidcsv::Document &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_sort_p(rapidcsv::Document &df) {
-    const size_t rowCount = df.GetRowCount();
+std::vector<size_t> simhash_sort_p(my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
 
@@ -177,8 +176,8 @@ std::vector<size_t> simhash_sort_p(rapidcsv::Document &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_sort_graycode(rapidcsv::Document &df) {
-    const size_t rowCount = df.GetRowCount();
+std::vector<size_t> simhash_sort_graycode(my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
 
@@ -193,8 +192,8 @@ std::vector<size_t> simhash_sort_graycode(rapidcsv::Document &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_cluster) {
-    const size_t rowCount = df.GetRowCount();
+std::vector<size_t> simhash_cluster(my_dataframe &df, size_t div_for_cluster) {
+    const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
     std::vector<std::array<int32_t, 4>> lsh_vec_to_cluster(rowCount);
@@ -207,8 +206,7 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_clust
                                  int32_t(lsh_vec[i].second >> 32 and ones_32),
                                  int32_t(lsh_vec[i].second >> 64 and ones_32),
                                  int32_t(lsh_vec[i].second >> 96 and ones_32)};
-        std::vector<std::string> row = df.GetRow<std::string>(i);
-        full_size += std::stoll(row[1]);
+        full_size += df.length_at(i);
     }
     // should be function of the size of the elements
     const size_t num_cluster = size_t(double(full_size) / double(div_for_cluster)) + 2;
@@ -228,8 +226,8 @@ std::vector<size_t> simhash_cluster(rapidcsv::Document &df, size_t div_for_clust
     return merged_clusters;
 }
 
-std::vector<size_t> filename_sort(rapidcsv::Document &df) {
-    const size_t rowCount = df.GetRowCount();
+std::vector<size_t> filename_sort(my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
 
 //    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
 //

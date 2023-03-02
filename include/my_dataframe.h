@@ -10,6 +10,7 @@
 #include <boost/compute/detail/sha1.hpp>
 #include <vector>
 #include <fstream>
+#include <cassert>
 
 class my_dataframe {
 private:
@@ -21,11 +22,10 @@ private:
 
 public:
     explicit my_dataframe(std::string &path, size_t _num_files) {
+        num_files = _num_files;
         sha1s.reserve(num_files);
         lengths.reserve(num_files);
         filenames.reserve(num_files);
-
-        num_files = _num_files;
 
         std::ifstream source(path, std::ios_base::binary);
         if (source.is_open()) {
@@ -40,27 +40,39 @@ public:
                     source.read(&c, 1);
                     tmp_sha1[i] = c;
                 }
+                for (auto ch: tmp_sha1) {
+                    assert(isxdigit(ch));
+                }
                 sha1s.push_back(tmp_sha1);
                 //skip comma
                 source.read(&c, 1);
-                size_t len;
-                size_t filename_size;
-                source >> len;
+                assert(c == ',');
+                std::string num;
+                //std::cout << source.tellg() << std::endl;
+                getline(source, num, ',');
+                //std::cout << source.tellg() << std::endl;
+
+                size_t len = std::stoi(num);
                 lengths.push_back(len);
-                // skip comma
-                source.read(&c, 1);
-                source >> filename_size;
-                // skip comma
-                source.read(&c, 1);
+
+                getline(source, num, ',');
+                //std::cout << source.tellg() << std::endl;
+                size_t filename_size = std::stoi(num);
+
                 std::vector<char> tmp(filename_size);
                 source.read(tmp.data(), filename_size);
                 filenames.emplace_back(tmp.begin(), tmp.end());
                 // skip \n
                 source.read(&c, 1);
+                assert(c == '\n');
             }
         } else {
             std::cout << "Error opening file";
         }
+    }
+
+    size_t length_at(size_t idx){
+        return lengths[idx];
     }
 
     std::string filename_at(size_t idx) {
@@ -74,13 +86,14 @@ public:
     std::string sha1_at_str(size_t idx) {
         std::array<unsigned char, 40> a(sha1_at(idx));
         std::string to_return;
+        to_return.resize(40);
         for (auto i = 0; i < 40; i++) {
-            to_return[i] = a[i];
+            to_return[i] = char(a[i]);
         }
         return to_return;
     }
 
-    size_t get_num_files(){
+    size_t get_num_files() {
         return num_files;
     }
 };
