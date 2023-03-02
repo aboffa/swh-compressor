@@ -77,6 +77,12 @@ int main(int argc, char **argv) {
                 auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
                 compress_decompress_from_df(ordered_rows, "simhash_cluster", filename, df, compressor, sorting_time);
             }
+            {
+                auto start = timer::now();
+                std::vector<size_t> ordered_rows(filename_sort(df));
+                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+                compress_decompress_from_df(ordered_rows, "filename_sorted", filename, df, compressor, sorting_time);
+            }
         }
     }
     return 0;

@@ -66,7 +66,8 @@ void
 compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string technique_name, std::string &dataset_name,
                             my_dataframe &df, std::string &compressor_path, size_t sorting_time,
                             std::string notes = "None") {
-    std::string path_working_dir = "/data/swh/tmp._NEW_Sofware_Heritage_c++_" + technique_name + "_" + std::to_string(getpid());
+    std::string path_working_dir =
+            "/data/swh/tmp._NEW_Sofware_Heritage_c++_" + technique_name + "_" + std::to_string(getpid());
     // no path and no flags
     std::string compressor_name = std::filesystem::path(compressor_path).filename();
     const size_t rowCount = df.get_num_files();
@@ -87,7 +88,8 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     }
     double uncompressed_size_MiB = double(uncompressed_size) / double(1 << 20);
 
-    std::cout << "File list: " << dataset_name << " of " << rowCount << " files of size (MiB) " << std::to_string(uncompressed_size_MiB) << std::endl;
+    std::cout << "File list: " << dataset_name << " of " << rowCount << " files of size (MiB) "
+              << std::to_string(uncompressed_size_MiB) << std::endl;
     std::cout << "Technique: " << technique_name << "+" << compressor_name << std::endl << std::flush;
 
     // TODO: I should use std::filesystem::path instead of std::strings
@@ -229,15 +231,21 @@ std::vector<size_t> simhash_cluster(my_dataframe &df, size_t div_for_cluster) {
 std::vector<size_t> filename_sort(my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
-//    std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
-//
-//    std::sort(lsh_vec.begin(), lsh_vec.end(), [](auto &left, auto &right) {
-//        return gray_code(left.second) < gray_code(right.second);
-//    });
+    std::vector<std::pair<size_t, std::string>> filename_vec;
+    filename_vec.reserve(rowCount);
+
+    for (auto i = 0; i < rowCount; i++) {
+        filename_vec.emplace_back(i, df.filename_at(i));
+    }
+
+    // could add std::execution::par_unseq,
+    std::sort(filename_vec.begin(), filename_vec.end(), [](auto &left, auto &right) {
+        return left.second < right.second;
+    });
 
     std::vector<size_t> to_return(rowCount);
-//    for (auto i = 0; i < rowCount; i++) {
-//        to_return[i] = lsh_vec[i].first;
-//    }
+    for (auto i = 0; i < rowCount; i++) {
+        to_return[i] = filename_vec[i].first;
+    }
     return to_return;
 }
