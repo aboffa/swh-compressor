@@ -30,7 +30,7 @@ std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
     return o;
 }
 
-const size_t NUM_THREAD = 32;
+const size_t NUM_THREAD = 16;
 const std::string BLOBS_DIR = "/data/swh/blobs";
 
 std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(my_dataframe &df) {
@@ -88,8 +88,8 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     }
     double uncompressed_size_MiB = double(uncompressed_size) / double(1 << 20);
 
-    std::cout << "File list: " << dataset_name << " of " << rowCount << " files of size (MiB) "
-              << std::to_string(uncompressed_size_MiB) << std::endl;
+    std::cout << "File list: " << dataset_name << " of " << rowCount << " files of size (GiB) "
+              << std::to_string(double(uncompressed_size) / double(1 << 30)) << std::endl;
     std::cout << "Technique: " << technique_name << "+" << compressor_name << std::endl << std::flush;
 
     // TODO: I should use std::filesystem::path instead of std::strings

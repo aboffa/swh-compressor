@@ -30,33 +30,28 @@ int main(int argc, char **argv) {
     //std::vector<std::string> compressors = {"/home/boffa/bin/zstd3"};
     std::vector<std::string> compressors = {"/home/boffa/bin/zstd3"};
 
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::cout << "Start computation at " << std::ctime(&now) << std::endl;
     for (int h = 1; h < argc; ++h) {
         std::string filename_path(argv[h]);
         std::size_t found = filename_path.find_last_of('/');
         // extract just the filename
         std::string filename = filename_path.substr(found + 1);
         size_t num_rows = 2346930;
-//        rapidcsv::Document df(filename_path, rapidcsv::LabelParams(0, 0),
-//                              rapidcsv::SeparatorParams(',' /* pSeparator */,
-//                                                        false /* pTrim */,
-//                                                        rapidcsv::sPlatformHasCR /* pHasCR */,
-//                                                        false /* pQuotedLinebreaks */,
-//                                                        false /* pAutoQuote */));
         my_dataframe df(filename_path, num_rows);
         for (auto &compressor: compressors) {
-
-            {
-                const size_t rowCount = df.get_num_files();
-                std::vector<size_t> ordered_rows(rowCount);
-                std::iota(ordered_rows.begin(), ordered_rows.end(), 0); // already random
-                compress_decompress_from_df(ordered_rows, "order_from_list", filename, df, compressor, 0);
-            }
-            {
-                auto start = timer::now();
-                std::vector<size_t> ordered_rows(simhash_sort(df));
-                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-                compress_decompress_from_df(ordered_rows, "simhash_sort", filename, df, compressor, sorting_time);
-            }
+//            {
+//                const size_t rowCount = df.get_num_files();
+//                std::vector<size_t> ordered_rows(rowCount);
+//                std::iota(ordered_rows.begin(), ordered_rows.end(), 0); // already random
+//                compress_decompress_from_df(ordered_rows, "order_from_list", filename, df, compressor, 0);
+//            }
+//            {
+//                auto start = timer::now();
+//                std::vector<size_t> ordered_rows(simhash_sort(df));
+//                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//                compress_decompress_from_df(ordered_rows, "simhash_sort", filename, df, compressor, sorting_time);
+//            }
             {
                 auto start = timer::now();
                 std::vector<size_t> ordered_rows(simhash_sort_p(df));
@@ -85,5 +80,7 @@ int main(int argc, char **argv) {
             }
         }
     }
+    auto end = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::cout << "End computation at " << std::ctime(&end) << std::endl;
     return 0;
 }

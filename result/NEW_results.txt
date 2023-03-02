@@ -1,0 +1,7 @@
+File list: random_selection_with_sha1_NEW_filename_len.csv of 2346930 files of size (MiB) 203651.399333
+Technique: order_from_list+zstd3
+compression ratio (%): 16.748784
+compression speed (MiB/s): 22.295971
+decompression speed (MiB/s): 457.643594mputation at " << std::ctime(&now);Start computation at Thu Mar  2 13:20:27 2023
+File list: random_selection_with_sha1_NEW_filename_len.csv of 2346930 files of size (MiB) 203651.399333
+Technique: simhash_sort_parallel+zstd3
