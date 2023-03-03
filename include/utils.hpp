@@ -49,7 +49,8 @@ std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(my_datafr
             if (std::filesystem::is_regular_file(filename_path, ec)) {
                 //it's a file
                 Simhash::hash_t res = 0;
-                res = Simhash::compute(filename_path);
+                if (std::filesystem::file_size(filename_path) < (1 << 20))
+                    res = Simhash::compute(filename_path);
                 lsh_vec_private.emplace_back(i, res);
             } else {
                 std::cerr << "ERROR -> " + ec.message() << std::endl;
@@ -128,7 +129,8 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
               << std::to_string(double(uncompressed_size_MiB) / double(compressed_time + sorting_time))
               << std::endl;
     std::cout << "decompression speed (MiB/s): "
-              << std::to_string(double(uncompressed_size_MiB) / double(decompressed_time)) << std::endl << std::flush;
+              << std::to_string(double(uncompressed_size_MiB) / double(decompressed_time)) << std::endl << std::endl
+              << std::flush;
 }
 
 

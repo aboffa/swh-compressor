@@ -1,0 +1,39 @@
+Start computation at Fri Mar  3 10:21:45 2023
+
+File list: random_selection_with_sha1_NEW_filename_len_small.csv of 12084 files of size (GiB) 1.046729
+Technique: order_from_list+zstd3
+compression ratio (%): 18.532478
+compression speed (MiB/s): 1.496998
+decompression speed (MiB/s): 267.962634
+
+File list: random_selection_with_sha1_NEW_filename_len_small.csv of 12084 files of size (GiB) 1.046729
+Technique: simhash_sort+zstd3
+compression ratio (%): 18.512221
+compression speed (MiB/s): 1.414051
+decompression speed (MiB/s): 267.962634
+
+File list: random_selection_with_sha1_NEW_filename_len_small.csv of 12084 files of size (GiB) 1.046729
+Technique: simhash_sort_parallel+zstd3
+compression ratio (%): 18.513053
+compression speed (MiB/s): 1.468288
+decompression speed (MiB/s): 267.962634
+
+File list: random_selection_with_sha1_NEW_filename_len_small.csv of 12084 files of size (GiB) 1.046729
+Technique: simhash_sort_graycode+zstd3
+compression ratio (%): 18.485791
+compression speed (MiB/s): 1.555661
+decompression speed (MiB/s): 267.962634
+
+File list: random_selection_with_sha1_NEW_filename_len_small.csv of 12084 files of size (GiB) 1.046729
+Technique: simhash_cluster+zstd3
+compression ratio (%): 18.537895
+compression speed (MiB/s): 1.368902
+decompression speed (MiB/s): 267.962634
+
+File list: random_selection_with_sha1_NEW_filename_len_small.csv of 12084 files of size (GiB) 1.046729
+Technique: filename_sorted+zstd3
+compression ratio (%): 18.348648
+compression speed (MiB/s): 1.478415
+decompression speed (MiB/s): 267.962634
+
+End computation at Fri Mar  3 11:35:39 2023

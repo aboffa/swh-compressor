@@ -34,7 +34,7 @@ public:
             while (c != '\n')
                 source.read(&c, 1);
             //21905e249f3d8411e1d84686f1cecaa2c633b981
-            for (auto h = 0; h < num_files; h++) {
+            for (auto h = 0; h < num_files and !source.eof(); h++) {
                 std::array<unsigned char, 40> tmp_sha1{};
                 for (auto i = 0; i < 40; i++) {
                     source.read(&c, 1);
