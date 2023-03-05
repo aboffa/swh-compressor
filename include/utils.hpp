@@ -32,6 +32,7 @@ std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
 
 const size_t NUM_THREAD = 16;
 const std::string BLOBS_DIR = "/data/swh/blobs";
+const std::string PROJECT_HOME = "/home/boffa/git-pack_on_SoftwareHeritage";
 
 std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
@@ -87,9 +88,11 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
         uncompressed_size += std::filesystem::file_size(filename_path);
         file << filename_path.erase(0, 1) << std::endl;
     }
+    assert(df.get_total_size() == uncompressed_size);
+
     double uncompressed_size_MiB = double(uncompressed_size) / double(1 << 20);
 
-    std::cout << "File list: " << dataset_name << " of " << rowCount << " files of size (GiB) "
+    std::cout << "File list: " << dataset_name << " from " << BLOBS_DIR << " of " << rowCount << " files of size (GiB) "
               << std::to_string(double(uncompressed_size) / double(1 << 30)) << std::endl;
     std::cout << "Technique: " << technique_name << "+" << compressor_name << std::endl << std::flush;
 
@@ -131,6 +134,8 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     std::cout << "decompression speed (MiB/s): "
               << std::to_string(double(uncompressed_size_MiB) / double(decompressed_time)) << std::endl << std::endl
               << std::flush;
+
+    std::filesystem::current_path(path_working_dir);
 }
 
 
@@ -159,7 +164,7 @@ std::vector<size_t> simhash_sort(my_dataframe &df) {
     });
 
     std::vector<size_t> to_return(rowCount);
-    for (auto i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
     return to_return;
@@ -174,7 +179,7 @@ std::vector<size_t> simhash_sort_p(my_dataframe &df) {
         return left.second < right.second;
     });
     std::vector<size_t> to_return(rowCount);
-    for (auto i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
     return to_return;
@@ -190,7 +195,7 @@ std::vector<size_t> simhash_sort_graycode(my_dataframe &df) {
     });
 
     std::vector<size_t> to_return(rowCount);
-    for (auto i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
         to_return[i] = lsh_vec[i].first;
     }
     return to_return;
@@ -205,7 +210,7 @@ std::vector<size_t> simhash_cluster(my_dataframe &df, size_t div_for_cluster) {
     Simhash::hash_t ones_32 = (Simhash::hash_t(1) << 32) - 1;
 
     size_t full_size = 0;
-    for (auto i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
         lsh_vec_to_cluster[i] = {int32_t(lsh_vec[i].second and ones_32),
                                  int32_t(lsh_vec[i].second >> 32 and ones_32),
                                  int32_t(lsh_vec[i].second >> 64 and ones_32),
@@ -233,10 +238,37 @@ std::vector<size_t> simhash_cluster(my_dataframe &df, size_t div_for_cluster) {
 std::vector<size_t> filename_sort(my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
+    std::vector<std::tuple<size_t, size_t, std::string>> filename_vec;
+    filename_vec.reserve(rowCount);
+
+    for (size_t i = 0; i < rowCount; i++) {
+        filename_vec.emplace_back(i, df.length_at(i), df.filename_at(i));
+    }
+
+    // could add std::execution::par_unseq,
+    std::sort(filename_vec.begin(), filename_vec.end(), [](auto &left, auto &right) {
+        if (get<2>(left) < get<2>(right)) return true;
+        else if (get<2>(left) == get<2>(right))
+            return get<1>(left) > get<1>(right);
+        else
+            return false;
+    });
+
+    std::vector<size_t> to_return(rowCount);
+    for (size_t i = 0; i < rowCount; i++) {
+        to_return[i] = get<0>(filename_vec[i]);
+    }
+    return to_return;
+}
+
+// TODO:
+std::vector<size_t> filename_simhash_hybrid_sort(my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
+
     std::vector<std::pair<size_t, std::string>> filename_vec;
     filename_vec.reserve(rowCount);
 
-    for (auto i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
         filename_vec.emplace_back(i, df.filename_at(i));
     }
 
@@ -244,9 +276,9 @@ std::vector<size_t> filename_sort(my_dataframe &df) {
     std::sort(filename_vec.begin(), filename_vec.end(), [](auto &left, auto &right) {
         return left.second < right.second;
     });
-
+    // TODO: here, inside the blocks of files with same name, sort by LSH
     std::vector<size_t> to_return(rowCount);
-    for (auto i = 0; i < rowCount; i++) {
+    for (size_t i = 0; i < rowCount; i++) {
         to_return[i] = filename_vec[i].first;
     }
     return to_return;

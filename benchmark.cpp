@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         std::size_t found = filename_path.find_last_of('/');
         // extract just the filename
         std::string filename = filename_path.substr(found + 1);
-        size_t num_rows = 12084;//2346930;
+        size_t num_rows = 2346930;//12084;
         my_dataframe df(filename_path, num_rows);
         for (auto &compressor: compressors) {
             {
@@ -45,6 +45,12 @@ int main(int argc, char **argv) {
                 std::vector<size_t> ordered_rows(rowCount);
                 std::iota(ordered_rows.begin(), ordered_rows.end(), 0); // already random
                 compress_decompress_from_df(ordered_rows, "order_from_list", filename, df, compressor, 0);
+            }
+            {
+                auto start = timer::now();
+                std::vector<size_t> ordered_rows(filename_sort(df));
+                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+                compress_decompress_from_df(ordered_rows, "filename_sorted", filename, df, compressor, sorting_time);
             }
 //            {
 //                auto start = timer::now();
@@ -66,18 +72,12 @@ int main(int argc, char **argv) {
                 compress_decompress_from_df(ordered_rows, "simhash_sort_graycode", filename, df, compressor,
                                             sorting_time);
             }
-            {
-                auto start = timer::now();
-                std::vector<size_t> ordered_rows(simhash_cluster(df, 1 << 20));
-                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-                compress_decompress_from_df(ordered_rows, "simhash_cluster", filename, df, compressor, sorting_time);
-            }
-            {
-                auto start = timer::now();
-                std::vector<size_t> ordered_rows(filename_sort(df));
-                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-                compress_decompress_from_df(ordered_rows, "filename_sorted", filename, df, compressor, sorting_time);
-            }
+//            {
+//                auto start = timer::now();
+//                std::vector<size_t> ordered_rows(simhash_cluster(df, 1 << 21));
+//                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//                compress_decompress_from_df(ordered_rows, "simhash_cluster", filename, df, compressor, sorting_time);
+//            }
         }
     }
     auto end = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

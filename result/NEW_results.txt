@@ -5,3 +5,11 @@ compression speed (MiB/s): 22.295971
 decompression speed (MiB/s): 457.643594mputation at " << std::ctime(&now);Start computation at Thu Mar  2 13:20:27 2023
 File list: random_selection_with_sha1_NEW_filename_len.csv of 2346930 files of size (MiB) 203651.399333
 Technique: simhash_sort_parallel+zstd3
+compression ratio (%): 13.059949
+compression speed (MiB/s): 14.584030
+decompression speed (MiB/s): 484.884284
+File list: random_selection_with_sha1_NEW_filename_len.csv of 2346930 files of size (MiB) 203651.399333
+Technique: simhash_sort_graycode+zstd3
+compression ratio (%): 13.063784
+compression speed (MiB/s): 13.346314
+decompression speed (MiB/s): 519.518876
