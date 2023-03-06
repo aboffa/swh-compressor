@@ -27,11 +27,19 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    //std::vector<std::string> compressors = {"/home/boffa/bin/zstd3"};
-    std::vector<std::string> compressors = {"/home/boffa/bin/zstd3"};
+    //std::vector<std::string> compressors = {"/usr/bin/zstd"};
+    std::vector<std::string> compressors = {
+            "/home/boffa/bin/zstd_3_T16",
+            "/home/boffa/bin/zstd_12_T16",
+            "/home/boffa/bin/zstd_19_T16",
+            "/home/boffa/bin/zstd_22_T16",
+            "/home/boffa/bin/zstd_22_T32",
+            "/home/boffa/bin/zstd_22_T64"
+            };
 
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::cout << "Start computation at " << std::ctime(&now) << std::endl;
+    std::cout << "Start computation at " << std::ctime(&now);
+    std::cout << "Num threads (computing simhash): " << std::to_string(NUM_THREAD) << std::endl;
     for (int h = 1; h < argc; ++h) {
         std::string filename_path(argv[h]);
         std::size_t found = filename_path.find_last_of('/');
@@ -49,6 +57,7 @@ int main(int argc, char **argv) {
             {
                 auto start = timer::now();
                 std::vector<size_t> ordered_rows(filename_sort(df));
+                assert(check_is_permutation(ordered_rows));
                 auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
                 compress_decompress_from_df(ordered_rows, "filename_sorted", filename, df, compressor, sorting_time);
             }
@@ -58,18 +67,26 @@ int main(int argc, char **argv) {
 //                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
 //                compress_decompress_from_df(ordered_rows, "simhash_sort", filename, df, compressor, sorting_time);
 //            }
-            {
-                auto start = timer::now();
-                std::vector<size_t> ordered_rows(simhash_sort_p(df));
-                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-                compress_decompress_from_df(ordered_rows, "simhash_sort_parallel", filename, df, compressor,
-                                            sorting_time);
-            }
+//            {
+//                auto start = timer::now();
+//                std::vector<size_t> ordered_rows(simhash_sort_p(df));
+//                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+//                compress_decompress_from_df(ordered_rows, "simhash_sort_parallel", filename, df, compressor,
+//                                            sorting_time);
+//            }
             {
                 auto start = timer::now();
                 std::vector<size_t> ordered_rows(simhash_sort_graycode(df));
                 auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
                 compress_decompress_from_df(ordered_rows, "simhash_sort_graycode", filename, df, compressor,
+                                            sorting_time);
+            }
+            {
+                auto start = timer::now();
+                std::vector<size_t> ordered_rows(filename_simhash_hybrid_sort(df));
+                assert(check_is_permutation(ordered_rows));
+                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+                compress_decompress_from_df(ordered_rows, "filename_simhash_hybrid_sort", filename, df, compressor,
                                             sorting_time);
             }
 //            {

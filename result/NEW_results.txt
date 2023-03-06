@@ -13,3 +13,30 @@ Technique: simhash_sort_graycode+zstd3
 compression ratio (%): 13.063784
 compression speed (MiB/s): 13.346314
 decompression speed (MiB/s): 519.518876
+Start computation at Sun Mar  5 18:12:40 2023
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd3
+compression ratio (%): 16.733119
+compression speed (MiB/s): 20.627104
+decompression speed (MiB/s): 463.898404
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_sorted+zstd3
+compression ratio (%): 11.278763
+compression speed (MiB/s): 10.853304
+decompression speed (MiB/s): 515.573163
+
+terminate called after throwing an instance of 'std::filesystem::__cxx11::filesystem_error'
+  what():  filesystem error: cannot set current path: No such file or directory
+Start computation at Mon Mar  6 11:40:05 2023
+
+Num threads: 64
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd3
+compression ratio (%): 16.750974
+compression speed (MiB/s): 20.979850
+decompression speed (MiB/s): 419.899792
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_sorted+zstd3

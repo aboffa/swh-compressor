@@ -1,9 +1,7 @@
 //
 // Created by boffa on 01/03/23.
 //
-
-#ifndef SWH_COMPRESSOR_MY_DATAFRAME_H
-#define SWH_COMPRESSOR_MY_DATAFRAME_H
+#pragma once
 
 #include <sstream>
 #include <iomanip>
@@ -88,19 +86,19 @@ public:
         }
     }
 
-    size_t length_at(size_t idx){
+    size_t length_at(size_t idx) const {
         return lengths[idx];
     }
 
-    std::string filename_at(size_t idx) {
+    std::string filename_at(size_t idx) const {
         return filenames[idx];
     }
 
-    std::array<unsigned char, 40> sha1_at(size_t idx) {
+    std::array<unsigned char, 40> sha1_at(size_t idx) const {
         return sha1s[idx];
     }
 
-    std::string sha1_at_str(size_t idx) {
+    std::string sha1_at_str(size_t idx) const {
         std::array<unsigned char, 40> a(sha1_at(idx));
         std::string to_return;
         to_return.resize(40);
@@ -110,13 +108,11 @@ public:
         return to_return;
     }
 
-    size_t get_num_files() {
+    size_t get_num_files() const {
         return num_files;
     }
 
-    size_t get_total_size() {
+    size_t get_total_size() const {
         return total_size;
     }
 };
-
-#endif //SWH_COMPRESSOR_MY_DATAFRAME_H
