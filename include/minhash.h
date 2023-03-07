@@ -11,14 +11,16 @@
 
 typedef unsigned __int128 uint128_t;
 
-namespace Minhash {
+template<size_t _NUM_PERMU = 32, typename T = int32_t>
+class Minhash {
     /**
      * The type of all hashes.
      */
-    static const size_t NUM_PERMU = 64;
-    typedef int64_t TYPE;
+public:
+    static const size_t NUM_PERMU = _NUM_PERMU;
+    typedef T TYPE;
 
     typedef std::array<TYPE, NUM_PERMU> hash_t;
 
-    hash_t compute(const std::string &filename);
-}
+    static hash_t compute(const std::string &filename);
+};

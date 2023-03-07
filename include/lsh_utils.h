@@ -1,6 +1,7 @@
 #pragma once
 
 const std::string WHITESPACE = " \n\r\t\f\v";
+const size_t LINE_SIZE_THREASHOLD = 10;
 
 inline std::string ltrim(const std::string &s)
 {

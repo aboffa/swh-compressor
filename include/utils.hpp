@@ -103,35 +103,35 @@ get_simhashes_parallel_list(const my_dataframe &df, std::vector<size_t> &indexes
     return lsh_vec;
 }
 
-std::vector<std::pair<size_t, Minhash::hash_t>> get_minhashes_parallel(const my_dataframe &df) {
-    const size_t rowCount = df.get_num_files();
-    std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec;
-    lsh_vec.reserve(rowCount);
-#pragma omp parallel num_threads(NUM_THREAD) shared(df)
-    {
-        std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec_private;
-#pragma omp for nowait
-        for (size_t i = 0; i < rowCount; ++i) {
-            std::string sha1 = df.sha1_at_str(i);
-            std::filesystem::path blob_hash(sha1);
-
-            std::string filename_path(BLOBS_DIR / blob_hash);
-            if (std::filesystem::is_regular_file(filename_path, ec)) {
-                //it's a file
-                Minhash::hash_t res = {0};
-                if (std::filesystem::file_size(filename_path) < (1 << 20))
-                    res = Minhash::compute(filename_path);
-                lsh_vec_private.emplace_back(i, res);
-            } else {
-                std::cerr << "ERROR -> " + ec.message() << std::endl;
-                exit(EXIT_FAILURE);
-            }
-        }
-#pragma omp critical
-        lsh_vec.insert(lsh_vec.end(), lsh_vec_private.begin(), lsh_vec_private.end());
-    }
-    return lsh_vec;
-}
+//std::vector<std::pair<size_t, Minhash<>::hash_t>> get_minhashes_parallel(const my_dataframe &df) {
+//    const size_t rowCount = df.get_num_files();
+//    std::vector<std::pair<size_t, Minhash<>::hash_t>> lsh_vec;
+//    lsh_vec.reserve(rowCount);
+//#pragma omp parallel num_threads(NUM_THREAD) shared(df)
+//    {
+//        std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec_private;
+//#pragma omp for nowait
+//        for (size_t i = 0; i < rowCount; ++i) {
+//            std::string sha1 = df.sha1_at_str(i);
+//            std::filesystem::path blob_hash(sha1);
+//
+//            std::string filename_path(BLOBS_DIR / blob_hash);
+//            if (std::filesystem::is_regular_file(filename_path, ec)) {
+//                //it's a file
+//                Minhash::hash_t res = {0};
+//                if (std::filesystem::file_size(filename_path) < (1 << 20))
+//                    res = Minhash::compute(filename_path);
+//                lsh_vec_private.emplace_back(i, res);
+//            } else {
+//                std::cerr << "ERROR -> " + ec.message() << std::endl;
+//                exit(EXIT_FAILURE);
+//            }
+//        }
+//#pragma omp critical
+//        lsh_vec.insert(lsh_vec.end(), lsh_vec_private.begin(), lsh_vec_private.end());
+//    }
+//    return lsh_vec;
+//}
 
 void
 compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string technique_name, std::string &dataset_name,
@@ -325,7 +325,7 @@ std::vector<size_t> minhash_cluster(const my_dataframe &df, size_t div_for_clust
     const size_t rowCount = df.get_num_files();
 
     //std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec(get_minhashes_parallel(df));
-    std::vector<Minhash::hash_t> lsh_vec;
+    std::vector<Minhash<>::hash_t> lsh_vec;
 
     for (size_t i = 0; i < rowCount; ++i) {
         std::string sha1 = df.sha1_at_str(i);
@@ -334,9 +334,10 @@ std::vector<size_t> minhash_cluster(const my_dataframe &df, size_t div_for_clust
         std::string filename_path(BLOBS_DIR / blob_hash);
         if (std::filesystem::is_regular_file(filename_path, ec)) {
             //it's a file
-            Minhash::hash_t res = {0};
+            Minhash<>::hash_t res;
+            std::fill(begin(res), end(res), Minhash<>::TYPE(-1));
             if (std::filesystem::file_size(filename_path) < (1 << 20))
-                res = Minhash::compute(filename_path);
+                res = Minhash<>::compute(filename_path);
             lsh_vec.emplace_back(res);
         } else {
             std::cerr << "ERROR -> " + ec.message() << std::endl;
@@ -346,7 +347,13 @@ std::vector<size_t> minhash_cluster(const my_dataframe &df, size_t div_for_clust
 
     // should be function of the size of the elements
     const size_t num_cluster = size_t(double(df.get_total_size()) / double(div_for_cluster)) + 2;
+    auto cp = dkm::clustering_parameters<Minhash<>::TYPE>(num_cluster);
+    cp.set_max_iteration(500);
+    cp.set_min_delta(10);
+    cp.set_random_seed(42);
+
     auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec, num_cluster);
+    //auto cluster_data = dkm::kmeans_lloyd(lsh_vec, cp);
 
     std::vector<std::vector<size_t>> clusters(num_cluster);
     size_t i = 0;
@@ -434,4 +441,10 @@ std::vector<size_t> filename_simhash_hybrid_sort(const my_dataframe &df) {
         }
     }
     return to_return;
+}
+
+std::vector<size_t> mime_type_simhash_sort(const my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
+
+    std::vector<size_t> to_return(rowCount);
 }

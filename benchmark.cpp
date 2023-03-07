@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::cout << "Start computation at " << std::ctime(&now);
-    std::cout << "Num threads (computing simhash): " << std::to_string(NUM_THREAD) << std::endl;
+    std::cout << "Num threads (computing LSH): " << std::to_string(NUM_THREAD) << std::endl;
     for (int h = 1; h < argc; ++h) {
         std::string filename_path(argv[h]);
         std::size_t found = filename_path.find_last_of('/');

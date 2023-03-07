@@ -23,7 +23,7 @@ Simhash::hash_t Simhash::compute(const std::string &filename) {
         // delete initial spaces and tabs
         // compute hash of the line
         std::string trimmed(trim(line));
-        if (trimmed.size() >= 10) {
+        if (trimmed.size() >= LINE_SIZE_THREASHOLD) {
             uint64_t hash1 = 0, hash2  = 0;
             Simhash::hash_t hash = 0;
             if constexpr (std::is_same_v<Simhash::hash_t, uint128_t>) {

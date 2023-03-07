@@ -11,12 +11,13 @@
 
 typedef unsigned __int128 uint128_t;
 
-namespace Simhash {
+class Simhash {
 
     /**
      * The type of all hashes.
      */
     //uint64_t
+public:
     typedef uint128_t hash_t;
 
     /**
@@ -24,5 +25,5 @@ namespace Simhash {
      */
     static const size_t BITS = sizeof(hash_t) * CHAR_BIT;
 
-    hash_t compute(const std::string &filename);
-}
+    static hash_t compute(const std::string &filename);
+};
