@@ -12,7 +12,7 @@
 #include "rapidcsv.h"
 #include "simhash.h"
 #include "dkm_parallel.hpp"
-
+#include "minhash.h"
 
 using timer = std::chrono::high_resolution_clock;
 std::error_code ec;
@@ -21,6 +21,8 @@ template<typename T>
 T gray_code(T x) {
     return x ^ (x >> 1);
 }
+
+typedef unsigned __int128 uint128_t;
 
 std::ostream &operator<<(std::ostream &o, uint128_t &to_print) {
     if (to_print >= (uint128_t(1) << 64)) {
@@ -40,7 +42,7 @@ bool check_is_permutation(std::vector<size_t> v) {
     return std::is_permutation(v.begin(), v.end(), incresing_integers.begin());
 }
 
-std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(my_dataframe &df) {
+std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(const my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
     lsh_vec.reserve(rowCount);
@@ -71,7 +73,7 @@ std::vector<std::pair<size_t, Simhash::hash_t>> get_simhashes_parallel(my_datafr
 }
 
 std::vector<std::pair<size_t, Simhash::hash_t>>
-get_simhashes_parallel_list(my_dataframe &df, std::vector<size_t> &indexes) {
+get_simhashes_parallel_list(const my_dataframe &df, std::vector<size_t> &indexes) {
     const size_t rowCount = df.get_num_files();
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
     lsh_vec.reserve(rowCount);
@@ -90,6 +92,36 @@ get_simhashes_parallel_list(my_dataframe &df, std::vector<size_t> &indexes) {
                 if (std::filesystem::file_size(filename_path) < (1 << 20))
                     res = Simhash::compute(filename_path);
                 lsh_vec_private.emplace_back(indexes[i], res);
+            } else {
+                std::cerr << "ERROR -> " + ec.message() << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        }
+#pragma omp critical
+        lsh_vec.insert(lsh_vec.end(), lsh_vec_private.begin(), lsh_vec_private.end());
+    }
+    return lsh_vec;
+}
+
+std::vector<std::pair<size_t, Minhash::hash_t>> get_minhashes_parallel(const my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
+    std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec;
+    lsh_vec.reserve(rowCount);
+#pragma omp parallel num_threads(NUM_THREAD) shared(df)
+    {
+        std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec_private;
+#pragma omp for nowait
+        for (size_t i = 0; i < rowCount; ++i) {
+            std::string sha1 = df.sha1_at_str(i);
+            std::filesystem::path blob_hash(sha1);
+
+            std::string filename_path(BLOBS_DIR / blob_hash);
+            if (std::filesystem::is_regular_file(filename_path, ec)) {
+                //it's a file
+                Minhash::hash_t res = {0};
+                if (std::filesystem::file_size(filename_path) < (1 << 20))
+                    res = Minhash::compute(filename_path);
+                lsh_vec_private.emplace_back(i, res);
             } else {
                 std::cerr << "ERROR -> " + ec.message() << std::endl;
                 exit(EXIT_FAILURE);
@@ -177,7 +209,7 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
 }
 
 
-std::vector<size_t> simhash_sort(my_dataframe &df) {
+std::vector<size_t> simhash_sort(const my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec;
@@ -189,7 +221,8 @@ std::vector<size_t> simhash_sort(my_dataframe &df) {
         std::string filename_path(BLOBS_DIR / blob_hash);
         if (std::filesystem::is_regular_file(filename_path, ec)) {
             Simhash::hash_t res = 0;
-            res = Simhash::compute(filename_path);
+            if (std::filesystem::file_size(filename_path) < (1 << 20))
+                res = Simhash::compute(filename_path);
             lsh_vec.emplace_back(i, res);
         } else {
             std::cerr << "ERROR -> " + ec.message() << std::endl;
@@ -208,7 +241,7 @@ std::vector<size_t> simhash_sort(my_dataframe &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_sort_p(my_dataframe &df) {
+std::vector<size_t> simhash_sort_p(const my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
@@ -223,7 +256,7 @@ std::vector<size_t> simhash_sort_p(my_dataframe &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_sort_list(my_dataframe &df, std::vector<size_t> &indexes) {
+std::vector<size_t> simhash_sort_list(const my_dataframe &df, std::vector<size_t> &indexes) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel_list(df, indexes));
@@ -238,7 +271,7 @@ std::vector<size_t> simhash_sort_list(my_dataframe &df, std::vector<size_t> &ind
     return to_return;
 }
 
-std::vector<size_t> simhash_sort_graycode(my_dataframe &df) {
+std::vector<size_t> simhash_sort_graycode(const my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
@@ -254,7 +287,7 @@ std::vector<size_t> simhash_sort_graycode(my_dataframe &df) {
     return to_return;
 }
 
-std::vector<size_t> simhash_cluster(my_dataframe &df, size_t div_for_cluster) {
+std::vector<size_t> simhash_cluster(const my_dataframe &df, size_t div_for_cluster) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel(df));
@@ -273,6 +306,47 @@ std::vector<size_t> simhash_cluster(my_dataframe &df, size_t div_for_cluster) {
     // should be function of the size of the elements
     const size_t num_cluster = size_t(double(full_size) / double(div_for_cluster)) + 2;
     auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec_to_cluster, num_cluster);
+
+    std::vector<std::vector<size_t>> clusters(num_cluster);
+    size_t i = 0;
+    for (const auto &label: std::get<1>(cluster_data)) {
+        clusters[label].push_back(i++);
+    }
+    std::vector<size_t> merged_clusters;
+    merged_clusters.reserve(rowCount);
+
+    for (auto &items: clusters) {
+        std::move(items.begin(), items.end(), std::back_inserter(merged_clusters));
+    }
+    return merged_clusters;
+}
+
+std::vector<size_t> minhash_cluster(const my_dataframe &df, size_t div_for_cluster) {
+    const size_t rowCount = df.get_num_files();
+
+    //std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec(get_minhashes_parallel(df));
+    std::vector<Minhash::hash_t> lsh_vec;
+
+    for (size_t i = 0; i < rowCount; ++i) {
+        std::string sha1 = df.sha1_at_str(i);
+        std::filesystem::path blob_hash(sha1);
+
+        std::string filename_path(BLOBS_DIR / blob_hash);
+        if (std::filesystem::is_regular_file(filename_path, ec)) {
+            //it's a file
+            Minhash::hash_t res = {0};
+            if (std::filesystem::file_size(filename_path) < (1 << 20))
+                res = Minhash::compute(filename_path);
+            lsh_vec.emplace_back(res);
+        } else {
+            std::cerr << "ERROR -> " + ec.message() << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // should be function of the size of the elements
+    const size_t num_cluster = size_t(double(df.get_total_size()) / double(div_for_cluster)) + 2;
+    auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec, num_cluster);
 
     std::vector<std::vector<size_t>> clusters(num_cluster);
     size_t i = 0;
@@ -314,8 +388,7 @@ std::vector<size_t> filename_sort(const my_dataframe &df) {
     return to_return;
 }
 
-// TODO:
-std::vector<size_t> filename_simhash_hybrid_sort(my_dataframe &df) {
+std::vector<size_t> filename_simhash_hybrid_sort(const my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::tuple<size_t, size_t, std::string>> filename_vec;
@@ -334,7 +407,7 @@ std::vector<size_t> filename_simhash_hybrid_sort(my_dataframe &df) {
             return false;
     });
 
-    // TODO: here, inside the blocks of files with same name, sort by LSH
+    // inside the blocks of files with same name, sort by LSH
     std::string curr_fn = get<2>(filename_vec[0]);
     std::vector<size_t> curr_indexes;
     std::vector<size_t> to_return;
