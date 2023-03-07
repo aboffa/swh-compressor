@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "dkm.hpp"
+#include "utils.hpp"
 
 /*
 DKM - A k-means implementation that is generic across variable data dimensions.
@@ -90,7 +91,7 @@ Calculate the index of the mean each data point is closest to (euclidean distanc
         std::vector<uint32_t> calculate_clusters_parallel(
                 const std::vector<std::array<T, N>>& data, const std::vector<std::array<T, N>>& means) {
             std::vector<uint32_t> clusters(data.size(), 0);
-#pragma omp parallel for
+#pragma omp parallel for num_threads(16)
             for (size_t i = 0; i < data.size(); ++i) {
                 clusters[i] = closest_mean(data[i], means);
             }

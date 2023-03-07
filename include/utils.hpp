@@ -321,7 +321,8 @@ std::vector<size_t> simhash_cluster(const my_dataframe &df, size_t div_for_clust
     return merged_clusters;
 }
 
-std::vector<size_t> minhash_cluster(const my_dataframe &df, size_t div_for_cluster) {
+std::vector<size_t>
+minhash_cluster(const my_dataframe &df, size_t div_for_cluster, size_t max_iteration = 2000, int min_delta = 5) {
     const size_t rowCount = df.get_num_files();
 
     //std::vector<std::pair<size_t, Minhash::hash_t>> lsh_vec(get_minhashes_parallel(df));
@@ -348,11 +349,13 @@ std::vector<size_t> minhash_cluster(const my_dataframe &df, size_t div_for_clust
     // should be function of the size of the elements
     const size_t num_cluster = size_t(double(df.get_total_size()) / double(div_for_cluster)) + 2;
     auto cp = dkm::clustering_parameters<Minhash<>::TYPE>(num_cluster);
-    cp.set_max_iteration(500);
-    cp.set_min_delta(10);
+
+    cp.set_max_iteration(max_iteration);
+    cp.set_min_delta(min_delta);
+
     cp.set_random_seed(42);
 
-    auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec, num_cluster);
+    auto cluster_data = dkm::kmeans_lloyd_parallel(lsh_vec, cp);
     //auto cluster_data = dkm::kmeans_lloyd(lsh_vec, cp);
 
     std::vector<std::vector<size_t>> clusters(num_cluster);

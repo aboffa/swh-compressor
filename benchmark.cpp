@@ -33,19 +33,23 @@ int main(int argc, char **argv) {
             //"/home/boffa/bin/zstd_22_T16",
             //"/home/boffa/bin/zstd_22_T32",
             //"/home/boffa/bin/zstd_22_T64"
-            };
+    };
 
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::cout << "Start computation at " << std::ctime(&now);
-    std::cout << "Num threads (computing LSH): " << std::to_string(NUM_THREAD) << std::endl;
+    std::cout << "Num threads (computing LSH and clustering): " << std::to_string(NUM_THREAD) << std::endl;
     for (int h = 1; h < argc; ++h) {
         std::string filename_path(argv[h]);
         std::size_t found = filename_path.find_last_of('/');
         // extract just the filename
         std::string filename = filename_path.substr(found + 1);
 
-        //size_t num_rows = 2346930;
-        size_t num_rows = 12084;
+        // real test
+        size_t num_rows = 2346930;
+
+        //debug
+        //size_t num_rows = 12084;
+
         my_dataframe df(filename_path, num_rows);
         for (auto &compressor: compressors) {
 //            {
@@ -95,11 +99,16 @@ int main(int argc, char **argv) {
 //                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
 //                compress_decompress_from_df(ordered_rows, "simhash_cluster", filename, df, compressor, sorting_time);
 //            }
-            {
-                auto start = timer::now();
-                std::vector<size_t> ordered_rows(minhash_cluster(df, 1 << 21));
-                auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
-                compress_decompress_from_df(ordered_rows, "minhash_cluster", filename, df, compressor, sorting_time);
+            for (auto mi: {1000, 2000, 5000, 10000}) {
+                for (auto md: {1, 2, 5, 10}) {
+                    auto start = timer::now();
+                    std::vector<size_t> ordered_rows(minhash_cluster(df, 1 << 21, mi, md));
+                    auto sorting_time = std::chrono::duration_cast<std::chrono::seconds>(timer::now() - start).count();
+                    compress_decompress_from_df(ordered_rows,
+                                                "minhash_cluster+" + std::to_string(mi) + "+" + std::to_string(md),
+                                                filename, df, compressor,
+                                                sorting_time);
+                }
             }
 //            {
 //                auto start = timer::now();

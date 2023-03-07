@@ -1,0 +1,2 @@
+Start computation at Tue Mar  7 17:02:59 2023
+Num threads (computing LSH and clustering): 16
