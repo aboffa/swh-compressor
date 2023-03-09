@@ -198,6 +198,8 @@ compress_decompress_from_df(std::vector<size_t> &ordered_rows, std::string techn
     std::cout << "compression ratio (%): "
               << std::to_string(double(compressed_size) / double(uncompressed_size) * 100.)
               << std::endl;
+    std::cout << "sorting time (s): " << std::to_string(sorting_time) << std::endl;
+    std::cout << "compression time (s): " << std::to_string(compressed_time) << std::endl;
     std::cout << "compression speed (MiB/s): "
               << std::to_string(double(uncompressed_size_MiB) / double(compressed_time + sorting_time))
               << std::endl;
@@ -399,6 +401,54 @@ std::vector<size_t> filename_sort(const my_dataframe &df) {
 }
 
 std::vector<size_t> filename_simhash_hybrid_sort(const my_dataframe &df) {
+    const size_t rowCount = df.get_num_files();
+
+    std::vector<std::tuple<size_t, size_t, std::string>> filename_vec;
+    filename_vec.reserve(rowCount);
+
+    for (size_t i = 0; i < rowCount; i++) {
+        filename_vec.emplace_back(i, df.length_at(i), df.filename_at(i));
+    }
+
+    // could add std::execution::par_unseq,
+    std::sort(filename_vec.begin(), filename_vec.end(), [](auto &left, auto &right) {
+        if (get<2>(left) < get<2>(right)) return true;
+        else if (get<2>(left) == get<2>(right))
+            return get<1>(left) > get<1>(right);
+        else
+            return false;
+    });
+
+    // inside the blocks of files with same name, sort by LSH
+    std::string curr_fn = get<2>(filename_vec[0]);
+    std::vector<size_t> curr_indexes;
+    std::vector<size_t> to_return;
+    to_return.reserve(rowCount);
+    curr_indexes.push_back(get<0>(filename_vec[0]));
+    for (size_t i = 1; i < rowCount; i++) {
+        curr_indexes.push_back(get<0>(filename_vec[i]));
+        if (get<2>(filename_vec[i]) == curr_fn) {
+            continue;
+        } else {
+            if (curr_indexes.size() > 5) {
+                std::vector<std::pair<size_t, Simhash::hash_t>> lsh_vec(get_simhashes_parallel_list(df, curr_indexes));
+                std::sort(lsh_vec.begin(), lsh_vec.end(), [](auto &left, auto &right) {
+                    return left.second < right.second;
+                });
+                for (size_t j = 0; j < curr_indexes.size(); j++) {
+                    curr_indexes[j] = lsh_vec[j].first;
+                }
+            }
+            for (size_t j = 0; j < curr_indexes.size(); j++) {
+                to_return.push_back(curr_indexes[j]);
+            }
+            curr_indexes.clear();
+        }
+    }
+    return to_return;
+}
+
+std::vector<size_t> filename_simhash_hybrid_cluster(const my_dataframe &df) {
     const size_t rowCount = df.get_num_files();
 
     std::vector<std::tuple<size_t, size_t, std::string>> filename_vec;

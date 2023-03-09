@@ -40,3 +40,119 @@ decompression speed (MiB/s): 419.899792
 
 File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
 Technique: filename_sorted+zstd3
+compression ratio (%): 11.274341
+compression speed (MiB/s): 10.722445
+decompression speed (MiB/s): 520.847569
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: simhash_sort_parallel+zstd3
+Start computation at Mon Mar  6 20:39:36 2023
+Num threads (computing simhash): 16
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 12084 files of size (GiB) 1.046729
+Technique: order_from_list+zstd_3_T16
+compression ratio (%): 21.084948
+compression speed (MiB/s): 119.094504
+decompression speed (MiB/s): 535.925268
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 12084 files of size (GiB) 1.046729
+Technique: filename_sorted+zstd_3_T16
+Start computation at Mon Mar  6 20:39:55 2023
+Num threads (computing simhash): 16
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd_3_T16
+compression ratio (%): 17.375727
+compression speed (MiB/s): 45.478204
+decompression speed (MiB/s): 462.844089
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_sorted+zstd_3_T16
+compression ratio (%): 11.898862
+compression speed (MiB/s): 74.028135
+decompression speed (MiB/s): 483.732540
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: simhash_sort_graycode+zstd_3_T16
+compression ratio (%): 16.817411
+compression speed (MiB/s): 49.902328
+decompression speed (MiB/s): 459.709705
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_simhash_hybrid_sort+zstd_3_T16
+compression ratio (%): 11.898367
+compression speed (MiB/s): 72.758628
+decompression speed (MiB/s): 518.196945
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd_12_T16
+compression ratio (%): 17.050791
+compression speed (MiB/s): 33.767435
+decompression speed (MiB/s): 474.711887
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_sorted+zstd_12_T16
+compression ratio (%): 11.553001
+compression speed (MiB/s): 41.150010
+decompression speed (MiB/s): 505.338460
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: simhash_sort_graycode+zstd_12_T16
+compression ratio (%): 16.460676
+compression speed (MiB/s): 32.131808
+decompression speed (MiB/s): 466.021509
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_simhash_hybrid_sort+zstd_12_T16
+compression ratio (%): 11.553561
+compression speed (MiB/s): 48.720430
+decompression speed (MiB/s): 535.924735
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd_19_T16
+compression ratio (%): 16.739912
+compression speed (MiB/s): 20.393691
+decompression speed (MiB/s): 451.555209
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_sorted+zstd_19_T16
+compression ratio (%): 11.309114
+compression speed (MiB/s): 19.563055
+decompression speed (MiB/s): 438.903878
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: simhash_sort_graycode+zstd_19_T16
+compression ratio (%): 16.170447
+compression speed (MiB/s): 16.030494
+decompression speed (MiB/s): 255.522458
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_simhash_hybrid_sort+zstd_19_T16
+compression ratio (%): 11.309413
+compression speed (MiB/s): 9.916317
+decompression speed (MiB/s): 192.851704
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd_22_T16
+compression ratio (%): 16.759145
+compression speed (MiB/s): 10.645656
+decompression speed (MiB/s): 192.851704
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_sorted+zstd_22_T16
+compression ratio (%): 11.271932
+compression speed (MiB/s): 4.958038
+decompression speed (MiB/s): 213.024476
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: simhash_sort_graycode+zstd_22_T16
+compression ratio (%): 16.243638
+compression speed (MiB/s): 10.360248
+decompression speed (MiB/s): 209.087679
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: filename_simhash_hybrid_sort+zstd_22_T16
+compression ratio (%): 11.277331
+compression speed (MiB/s): 5.292671
+decompression speed (MiB/s): 204.264192
+
+File list: random_selection_with_sha1_NEW_filename_len.csv from /data/swh/blobs of 2346930 files of size (GiB) 198.878320
+Technique: order_from_list+zstd_22_T32
