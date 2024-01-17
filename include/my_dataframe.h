@@ -82,6 +82,10 @@ public:
                 total_size_from_fs += size_from_fs;
                 assert(size_from_fs == this->length_at(i));
             }
+            sha1s.shrink_to_fit();
+            lengths.shrink_to_fit();
+            filenames.shrink_to_fit();
+
             assert(total_size_from_fs == total_size);
         } else {
             std::cout << "Error opening file";
